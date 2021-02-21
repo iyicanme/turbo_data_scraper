@@ -1,10 +1,9 @@
-from multiprocessing import SimpleQueue, Lock
+from multiprocessing import SimpleQueue
 
 
-class IdQueue:
+class Queue:
     def __init__(self):
         self.queue = SimpleQueue()
-        self.lock = Lock()
 
     def enqueue(self, e):
         self.queue.put(e)
