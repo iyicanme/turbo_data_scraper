@@ -6,5 +6,6 @@
   "file_name_pattern": "",
   "worker_name_pattern": "",
   "worker_count": 0,
-  "file_size_binary_power": 0
+  "file_size_binary_power": 0,
+  "sleep_duration": 0
 }

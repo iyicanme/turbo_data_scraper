@@ -1,0 +1,2 @@
+class ApiRateLimitReachedException(Exception):
+    pass

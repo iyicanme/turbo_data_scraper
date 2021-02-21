@@ -29,3 +29,6 @@ class Config:
 
     def get_file_size_binary_power(self):
         return self.config["file_size_binary_power"]
+
+    def get_sleep_duration(self):
+        return self.config["sleep_duration"]
