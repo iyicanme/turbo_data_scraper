@@ -30,7 +30,9 @@ class MatchHistoryApiRequest(ApiRequest):
         return self
 
     def with_start_at_match_id(self, start_at_match_id: int):
-        self.query_parameters["start_at_match_id"] = str(start_at_match_id)
+        if start_at_match_id != -1:
+            self.query_parameters["start_at_match_id"] = str(start_at_match_id)
+            
         return self
 
     def with_matches_requested(self, matches_requested: int):
