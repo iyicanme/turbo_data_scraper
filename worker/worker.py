@@ -4,10 +4,12 @@ from multiprocessing import Process
 
 
 class Worker(ABC):
-    def __init__(self, api, key, sleep_duration):
+    def __init__(self, api, key, sleep_duration, log_queue):
         self.api = api
         self.key = key
         self.sleep_duration = sleep_duration
+        self.log_queue = log_queue
+
         self.process = None
 
     def start(self):
