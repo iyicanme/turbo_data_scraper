@@ -1,12 +1,15 @@
 *
 
+!.gitignore
+
 !api
 !data
+!log
+!queueing
 !sink
 !util
 !worker
 
-!.gitignore
 !config.json
 
-!*.py
+!turbo_data_scraper.py
