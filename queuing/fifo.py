@@ -1,9 +1,11 @@
-from multiprocessing import Queue as MpQueue
+from multiprocessing import Queue
+
+from queue import Empty
 
 
-class Queue:
+class Fifo:
     def __init__(self):
-        self.queue = MpQueue()
+        self.queue = Queue()
 
     def enqueue(self, e):
         self.queue.put(e)
@@ -11,7 +13,7 @@ class Queue:
     def dequeue(self):
         try:
             return self.queue.get(block=False)
-        except Exception:
+        except Empty:
             return None
 
     def __len__(self):
