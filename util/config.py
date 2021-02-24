@@ -6,8 +6,11 @@ class Config:
         with open("config.json", "r") as fp:
             self.config = load(fp)
 
-    def get_api_key(self):
-        return self.config["api_key"]
+    def get_history_worker_api_key(self):
+        return self.config["history_worker_api_key"]
+
+    def get_details_workers_api_keys(self):
+        return self.config["details_workers_api_keys"]
 
     def get_start_match_id(self):
         return self.config["start_match_id"]
@@ -23,9 +26,6 @@ class Config:
 
     def get_worker_name_pattern(self):
         return self.config["worker_name_pattern"]
-
-    def get_worker_count(self):
-        return self.config["worker_count"]
 
     def get_file_size_binary_power(self):
         return self.config["file_size_binary_power"]

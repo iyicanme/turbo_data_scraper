@@ -1,6 +1,7 @@
-from log.logger import Logger
 from queuing.broker import Broker
 from queuing.dealer import Dealer
+
+from log.logger import Logger
 from sink.file_sink import FileSink
 from util.config import Config
 from worker.details_worker import DetailsWorker
@@ -19,7 +20,7 @@ class TurboDataScraper:
         self.config = Config()
 
         self.id_dealer = Dealer()
-        self.history_worker = HistoryWorker(self.config.get_api_key(),
+        self.history_worker = HistoryWorker(self.config.get_history_worker_api_key(),
                                             self.config.get_sleep_duration(),
                                             self.log_broker.create_queue(),
                                             sink=self.id_dealer,
@@ -27,8 +28,8 @@ class TurboDataScraper:
                                             matches_requested=self.config.get_matches_requested())
 
         self.workers = []
-        for i in range(self.config.get_worker_count()):
-            worker = DetailsWorker(self.config.get_api_key(),
+        for i, api_key in enumerate(self.config.get_details_workers_api_keys()):
+            worker = DetailsWorker(api_key,
                                    self.config.get_sleep_duration(),
                                    self.log_broker.create_queue(),
                                    source=self.id_dealer.create_queue(),
@@ -68,13 +69,13 @@ class TurboDataScraper:
             return
 
         config = {
-            "api_key": "",
+            "history_worker_api_key": "",
+            "details_workers_api_keys": [],
             "start_match_id": 0,
             "matches_requested": 0,
             "data_path": "",
             "file_name_pattern": "",
             "worker_name_pattern": "",
-            "worker_count": 0,
             "file_size_binary_power": 0,
             "sleep_duration": 0
         }
