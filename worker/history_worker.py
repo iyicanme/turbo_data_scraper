@@ -9,11 +9,11 @@ from worker.worker import Worker
 
 class HistoryWorker(Worker):
     def __init__(self, key, sleep_duration, log_queue, sink, start_match_id, matches_requested=100):
+        Worker.__init__(self, MatchHistoryApi(), key, sleep_duration, log_queue)
+
         self.start_match_id = start_match_id
         self.matches_requested = matches_requested
         self.sink = sink
-
-        Worker.__init__(self, MatchHistoryApi(), key, sleep_duration, log_queue)
 
     def _work(self):
         last_match_id = self.start_match_id

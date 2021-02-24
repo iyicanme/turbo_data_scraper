@@ -8,10 +8,10 @@ from worker.worker import Worker
 
 class DetailsWorker(Worker):
     def __init__(self, key, sleep_duration, log_queue, source, sink):
+        Worker.__init__(self, MatchDetailsApi(), key, sleep_duration, log_queue)
+
         self.source = source
         self.sink = sink
-
-        Worker.__init__(self, MatchDetailsApi(), key, sleep_duration, log_queue)
 
     def _work(self):
         while True:
