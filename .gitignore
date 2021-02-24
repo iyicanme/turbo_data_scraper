@@ -5,11 +5,11 @@
 !api
 !data
 !log
-!queueing
+!queuing
 !sink
 !util
 !worker
 
-!config.json
-
 !turbo_data_scraper.py
+
+!requirements.txt
