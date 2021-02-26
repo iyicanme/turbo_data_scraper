@@ -4,12 +4,8 @@ from multiprocessing import Process
 
 
 class Worker(ABC):
-    def __init__(self, api, key, sleep_duration, log_queue):
-        self.api = api
-        self.key = key
-        self.sleep_duration = sleep_duration
-        self.log_queue = log_queue
-
+    def __init__(self):
+        self.keep_running = True
         self.process = None
 
     def start(self):
@@ -21,6 +17,9 @@ class Worker(ABC):
     def join(self):
         if self.process is not None:
             self.process.join()
+
+    def signal_termination(self):
+        self.keep_running = False
 
     @abstractmethod
     def _work(self):

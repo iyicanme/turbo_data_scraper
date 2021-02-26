@@ -1,46 +1,48 @@
 from queuing.broker import Broker
 from queuing.dealer import Dealer
-
-from log.logger import Logger
 from sink.file_sink import FileSink
 from util.config import Config
-from worker.details_worker import DetailsWorker
-from worker.history_worker import HistoryWorker
+from util.log import init_logging
+from worker.details_api_worker import DetailsApiWorker
+from worker.history_api_worker import HistoryApiWorker
+from worker.log_worker import LogWorker
 
 
 class TurboDataScraper:
     def __init__(self):
+        init_logging()
+
         if not TurboDataScraper.config_exists():
             TurboDataScraper.create_empty_config_file()
             exit(1)
 
         self.log_broker = Broker()
-        self.logger = Logger(self.log_broker)
+        self.log_worker = LogWorker(self.log_broker)
 
         self.config = Config()
 
         self.id_dealer = Dealer()
-        self.history_worker = HistoryWorker(self.config.get_history_worker_api_key(),
-                                            self.config.get_sleep_duration(),
-                                            self.log_broker.create_queue(),
-                                            sink=self.id_dealer,
-                                            start_match_id=self.config.get_start_match_id(),
-                                            matches_requested=self.config.get_matches_requested())
+        self.history_worker = HistoryApiWorker(self.config.get_history_worker_api_key(),
+                                               self.config.get_sleep_duration(),
+                                               self.log_broker.create_queue(),
+                                               sink=self.id_dealer,
+                                               start_match_id=self.config.get_start_match_id(),
+                                               matches_requested=self.config.get_matches_requested())
 
         self.workers = []
         for i, api_key in enumerate(self.config.get_details_workers_api_keys()):
-            worker = DetailsWorker(api_key,
-                                   self.config.get_sleep_duration(),
-                                   self.log_broker.create_queue(),
-                                   source=self.id_dealer.create_queue(),
-                                   sink=FileSink(path=self.config.get_data_path(),
-                                                 file_name_pattern=self.config.get_file_name_pattern(),
-                                                 unique_id=self.config.get_worker_name_pattern().format(i + 1),
-                                                 max_size=pow(2, self.config.get_file_size_binary_power())))
+            worker = DetailsApiWorker(api_key,
+                                      self.config.get_sleep_duration(),
+                                      self.log_broker.create_queue(),
+                                      source=self.id_dealer.create_queue(),
+                                      sink=FileSink(path=self.config.get_data_path(),
+                                                    file_name_pattern=self.config.get_file_name_pattern(),
+                                                    unique_id=self.config.get_worker_name_pattern().format(i + 1),
+                                                    max_size=pow(2, self.config.get_file_size_binary_power())))
             self.workers.append(worker)
 
     def start(self):
-        self.logger.start()
+        self.log_worker.start()
 
         self.history_worker.start()
 
@@ -55,7 +57,7 @@ class TurboDataScraper:
 
         self.history_worker.join()
 
-        self.logger.join()
+        self.log_worker.join()
 
     @staticmethod
     def config_exists():
