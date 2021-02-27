@@ -15,44 +15,44 @@ class HistoryApiWorker(ApiWorker):
         self.matches_requested = matches_requested
         self.sink = sink
 
+        self.last_match_id = start_match_id
+
     def _work(self):
-        last_match_id = self.start_match_id
+        response = None
+        while response is None:
+            try:
+                response = self.api.request() \
+                    .with_key(self.key) \
+                    .with_game_mode(GameMode.TURBO) \
+                    .with_start_at_match_id(self.start_match_id) \
+                    .with_matches_requested(self.matches_requested) \
+                    .execute()
+            except ApiRateLimitReachedException as ex:
+                log.e(self.log_queue, "History worker exception: {}, sleeping for {} minutes".format(
+                    ex.message,
+                    self.sleep_duration))
+                sleep(self.sleep_duration * 60)
+            except ErroneousResponseException as ex:
+                log.e(self.log_queue, "Details worker exception: {}, sleeping for {} minutes".format(
+                    ex.message,
+                    self.sleep_duration))
+                sleep(self.sleep_duration * 60)
 
-        log.i(self.log_queue, "History worker started")
+        log.i(self.log_queue, "Received history response")
 
-        while self.keep_running:
-            response = None
-            while response is None:
-                try:
-                    response = self.api.request() \
-                        .with_key(self.key) \
-                        .with_game_mode(GameMode.TURBO) \
-                        .with_start_at_match_id(self.start_match_id) \
-                        .with_matches_requested(self.matches_requested) \
-                        .execute()
-                except ApiRateLimitReachedException as ex:
-                    log.e(self.log_queue, "History worker exception: {}, sleeping for {} minutes".format(
-                        ex.message,
-                        self.sleep_duration))
-                    sleep(self.sleep_duration * 60)
-                except ErroneousResponseException as ex:
-                    log.e(self.log_queue, "Details worker exception: {}, sleeping for {} minutes".format(
-                        ex.message,
-                        self.sleep_duration))
-                    sleep(self.sleep_duration * 60)
+        if "result" not in response or \
+                "num_results" not in response["result"] or \
+                response["result"]["num_results"] == 0:
+            return
 
-            log.i(self.log_queue, "Received history response")
+        log.s(self.log_queue, "Worker thread received {} match IDs".format(response["result"]["num_results"]))
 
-            if "result" not in response or \
-                    "num_results" not in response["result"] or \
-                    response["result"]["num_results"] == 0:
-                continue
+        for match in response["result"]["matches"]:
+            self.sink.enqueue(int(match["match_id"]))
 
-            log.s(self.log_queue, "Worker thread received {} match IDs".format(response["result"]["num_results"]))
+        next_match_id = int(response["result"]["matches"][-1]["match_id"]) + 1
+        log.s(self.log_queue, "Updated last match ID {} with {}".format(self.last_match_id, next_match_id))
+        self.last_match_id = next_match_id
 
-            for match in response["result"]["matches"]:
-                self.sink.enqueue(int(match["match_id"]))
-
-            next_match_id = int(response["result"]["matches"][-1]["match_id"]) + 1
-            log.s(self.log_queue, "Updated last match ID {} with {}".format(last_match_id, next_match_id))
-            last_match_id = next_match_id
+    def _cleanup(self):
+        pass

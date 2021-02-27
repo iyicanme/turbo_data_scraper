@@ -8,10 +8,12 @@ class LogWorker(Worker):
         self.source = source
 
     def _work(self):
-        while True:
-            log_message = self.source.dequeue()
+        log_message = self.source.dequeue()
 
-            if log_message is None:
-                continue
+        if log_message is None:
+            return
 
-            print(log_message)
+        print(log_message)
+
+    def _cleanup(self):
+        pass

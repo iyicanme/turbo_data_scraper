@@ -14,35 +14,37 @@ class DetailsApiWorker(ApiWorker):
         self.sink = sink
 
     def _work(self):
-        while self.keep_running:
-            match_id = self.source.dequeue()
+        match_id = self.source.dequeue()
 
-            if match_id is None:
-                continue
+        if match_id is None:
+            return
 
-            response = None
-            while response is None:
-                try:
-                    response = self.api.request() \
-                        .with_key(self.key) \
-                        .with_match_id(match_id) \
-                        .execute()
-                except ApiRateLimitReachedException as ex:
-                    log.e(self.log_queue, "Details worker exception: {}, sleeping for {} minutes".format(
-                        ex.message,
-                        self.sleep_duration))
-                    sleep(self.sleep_duration * 60)
-                except ErroneousResponseException as ex:
-                    log.e(self.log_queue, "Details worker exception: {}, sleeping for {} minutes".format(
-                        ex.message,
-                        self.sleep_duration))
-                    sleep(self.sleep_duration * 60)
+        response = None
+        while response is None:
+            try:
+                response = self.api.request() \
+                    .with_key(self.key) \
+                    .with_match_id(match_id) \
+                    .execute()
+            except ApiRateLimitReachedException as ex:
+                log.e(self.log_queue, "Details worker exception: {}, sleeping for {} minutes".format(
+                    ex.message,
+                    self.sleep_duration))
+                sleep(self.sleep_duration * 60)
+            except ErroneousResponseException as ex:
+                log.e(self.log_queue, "Details worker exception: {}, sleeping for {} minutes".format(
+                    ex.message,
+                    self.sleep_duration))
+                sleep(self.sleep_duration * 60)
 
-            if "result" not in response or "match_id" not in response["result"]:
-                continue
+        if "result" not in response or "match_id" not in response["result"]:
+            return
 
-            log.s(self.log_queue, "Requested match with ID {}, received match data with ID {}".format(
-                match_id,
-                response["result"]["match_id"]))
+        log.s(self.log_queue, "Requested match with ID {}, received match data with ID {}".format(
+            match_id,
+            response["result"]["match_id"]))
 
-            self.sink.write(response)
+        self.sink.write(response)
+
+    def _cleanup(self):
+        pass
