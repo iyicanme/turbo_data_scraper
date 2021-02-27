@@ -23,3 +23,11 @@ class Broker:
         self.sequence %= self.queue_count
 
         return self.queues[queue_index].dequeue()
+
+    def get_contents(self):
+        queue_contents = []
+
+        for queue in self.queues:
+            queue_contents.extend(queue)
+
+        return queue_contents

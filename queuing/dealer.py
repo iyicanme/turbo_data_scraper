@@ -23,3 +23,11 @@ class Dealer:
         self.sequence %= self.queue_count
 
         self.queues[queue_index].enqueue(data)
+
+    def get_contents(self):
+        queue_contents = []
+
+        for queue in self.queues:
+            queue_contents.extend(queue)
+
+        return queue_contents

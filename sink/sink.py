@@ -2,12 +2,10 @@ from abc import ABC, abstractmethod
 
 
 class Sink(ABC):
-    def __init__(self):
-        pass
-
-    def __del__(self):
+    @abstractmethod
+    def write(self, data):
         pass
 
     @abstractmethod
-    def write(self, data):
+    def close(self):
         pass

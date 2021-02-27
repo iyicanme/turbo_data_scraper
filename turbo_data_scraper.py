@@ -12,20 +12,21 @@ class TurboDataScraper:
     def __init__(self):
         init_logging()
 
-        if not TurboDataScraper.config_exists():
-            TurboDataScraper.create_empty_config_file()
+        if not Config.exists():
+            Config.create_blank()
             exit(1)
 
-        self.log_broker = Broker()
-        self.log_worker = LogWorker(self.log_broker)
-
         self.config = Config()
+
+        self.log_broker = Broker()
+        self.log_worker = LogWorker(self.log_broker, self.config.get_dump_path())
 
         self.id_dealer = Dealer()
         self.history_worker = HistoryApiWorker(self.config.get_history_worker_api_key(),
                                                self.config.get_sleep_duration(),
                                                self.log_broker.create_queue(),
                                                sink=self.id_dealer,
+                                               dump_path=self.config.get_dump_path(),
                                                start_match_id=self.config.get_start_match_id(),
                                                matches_requested=self.config.get_matches_requested())
 
@@ -58,33 +59,6 @@ class TurboDataScraper:
         self.history_worker.join()
 
         self.log_worker.join()
-
-    @staticmethod
-    def config_exists():
-        from os.path import exists
-
-        return exists("config.json")
-
-    @staticmethod
-    def create_empty_config_file():
-        if TurboDataScraper.config_exists():
-            return
-
-        config = {
-            "history_worker_api_key": "",
-            "details_workers_api_keys": [],
-            "start_match_id": 0,
-            "matches_requested": 0,
-            "data_path": "",
-            "file_name_pattern": "",
-            "worker_name_pattern": "",
-            "file_size_binary_power": 0,
-            "sleep_duration": 0
-        }
-
-        from json import dump
-        with open("config.json", "w") as config_file:
-            dump(config, config_file)
 
 
 if __name__ == '__main__':

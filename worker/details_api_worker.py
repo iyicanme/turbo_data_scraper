@@ -47,4 +47,4 @@ class DetailsApiWorker(ApiWorker):
         self.sink.write(response)
 
     def _cleanup(self):
-        pass
+        self.sink.close()
