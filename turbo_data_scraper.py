@@ -42,6 +42,8 @@ class TurboDataScraper:
                                                     max_size=pow(2, self.config.get_file_size_binary_power())))
             self.workers.append(worker)
 
+        self.history_worker.load_dumped_match_ids()
+
     def start(self):
         self.log_worker.start()
 
@@ -52,7 +54,7 @@ class TurboDataScraper:
 
         return self
 
-    def terminate(self):
+    def join(self):
         for worker in self.workers:
             worker.join()
 
@@ -66,6 +68,6 @@ if __name__ == '__main__':
 
     try:
         while True:
-            scraper.terminate()
+            scraper.join()
     except KeyboardInterrupt:
-        scraper.terminate()
+        scraper.join()

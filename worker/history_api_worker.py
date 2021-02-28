@@ -1,3 +1,4 @@
+from json import load, dump
 from time import sleep
 
 from api.game_modes import GameMode
@@ -18,6 +19,18 @@ class HistoryApiWorker(ApiWorker):
         self.sink = sink
 
         self.last_match_id = start_match_id
+
+    def load_dumped_match_ids(self):
+        try:
+            with open("{}/match_ids.json".format(self.dump_path), "r") as dump_file:
+                context = load(dump_file)
+        except OSError:
+            return
+
+        self.last_match_id = context["last_match_id"]
+
+        for match_id in context["match_ids"]:
+            self.sink.enqueue(match_id)
 
     def _work(self):
         response = None
@@ -59,8 +72,12 @@ class HistoryApiWorker(ApiWorker):
     def _cleanup(self):
         pending_match_ids = self.sink.get_contents()
 
-        from json import dump
-        with open("{}/history.json".format(self.dump_path), "w") as dump_file:
-            dump(pending_match_ids, dump_file)
+        context = {
+            "last_match_id": self.last_match_id,
+            "match_ids": pending_match_ids
+        }
+
+        with open("{}/match_ids.json".format(self.dump_path), "w") as dump_file:
+            dump(context, dump_file)
 
         SynchronizedPrinter().print_synchronized("History worker cleaned up")
