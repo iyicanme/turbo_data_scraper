@@ -4,6 +4,7 @@
 
 !api
 !data
+!dump
 !queuing
 !sink
 !util

@@ -52,7 +52,7 @@ class TurboDataScraper:
 
         return self
 
-    def join(self):
+    def terminate(self):
         for worker in self.workers:
             worker.join()
 
@@ -62,4 +62,10 @@ class TurboDataScraper:
 
 
 if __name__ == '__main__':
-    TurboDataScraper().start().join()
+    scraper = TurboDataScraper().start()
+
+    try:
+        while True:
+            scraper.terminate()
+    except KeyboardInterrupt:
+        scraper.terminate()

@@ -3,6 +3,7 @@ from time import sleep
 from api.match_details_api import MatchDetailsApi
 from util import log
 from util.exception import ApiRateLimitReachedException, ErroneousResponseException
+from util.synchronized_printer import SynchronizedPrinter
 from worker.api_worker import ApiWorker
 
 
@@ -48,3 +49,4 @@ class DetailsApiWorker(ApiWorker):
 
     def _cleanup(self):
         self.sink.close()
+        SynchronizedPrinter().print_synchronized("Details worker with key {} cleaned up".format(self.key))

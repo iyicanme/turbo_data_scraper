@@ -4,6 +4,7 @@ from api.game_modes import GameMode
 from api.match_history_api import MatchHistoryApi
 from util import log
 from util.exception import ApiRateLimitReachedException, ErroneousResponseException
+from util.synchronized_printer import SynchronizedPrinter
 from worker.api_worker import ApiWorker
 
 
@@ -61,3 +62,5 @@ class HistoryApiWorker(ApiWorker):
         from json import dump
         with open("{}/history.json".format(self.dump_path), "w") as dump_file:
             dump(pending_match_ids, dump_file)
+
+        SynchronizedPrinter().print_synchronized("History worker cleaned up")

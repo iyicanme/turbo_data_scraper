@@ -28,6 +28,7 @@ class Dealer:
         queue_contents = []
 
         for queue in self.queues:
-            queue_contents.extend(queue)
+            while not queue.empty():
+                queue_contents.append(queue.dequeue())
 
         return queue_contents

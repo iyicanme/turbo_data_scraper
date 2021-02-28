@@ -16,5 +16,8 @@ class Fifo:
         except Empty:
             return None
 
+    def empty(self):
+        return self.queue.empty()
+
     def __len__(self):
         return self.queue.empty()

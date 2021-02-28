@@ -1,3 +1,4 @@
+from util.synchronized_printer import SynchronizedPrinter
 from worker.worker import Worker
 
 
@@ -14,10 +15,12 @@ class LogWorker(Worker):
         if log_message is None:
             return
 
-        print(log_message)
+        SynchronizedPrinter().print_synchronized(log_message)
 
     def _cleanup(self):
         pending_logs = self.source.get_contents()
 
         for log in pending_logs:
-            print(log)
+            SynchronizedPrinter().print_synchronized(log)
+
+        SynchronizedPrinter().print_synchronized("Logger cleaned up")

@@ -15,10 +15,11 @@ class Worker(ABC):
         return self
 
     def run(self):
-        while self.keep_running:
-            self._work()
-
-        self._cleanup()
+        try:
+            while self.keep_running:
+                self._work()
+        except KeyboardInterrupt:
+            self._cleanup()
 
     def join(self):
         if self.process is not None:
